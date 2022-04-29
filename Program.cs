@@ -16,7 +16,12 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 
 var app = builder.Build();
 
-ProductDbContext dbContext = app.Services.GetRequiredService<ProductDbContext>();
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+    dbContext.Database.EnsureCreated();
+    dbContext.Seed();
+}
 
 
 // Configure the HTTP request pipeline.
@@ -24,7 +29,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    dbContext.Database.EnsureCreated();
+
 }
 
 app.UseHttpsRedirection();
@@ -35,4 +40,4 @@ app.MapControllers();
 
 app.Run();
 
-dbContext.Seed();
+
